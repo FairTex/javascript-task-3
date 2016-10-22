@@ -15,7 +15,7 @@ exports.isStar = true;
  * @returns {Object}
  */
 exports.getAppropriateMoment = function (schedule, duration, workingHours) {
-    //console.info(schedule, duration, workingHours);
+    // console.info(schedule, duration, workingHours);
     var timeZone = parseInt(workingHours.from.split('+')[1]);
 
     var freeTimesSchedule = getFreeTime(schedule, workingHours);
