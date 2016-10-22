@@ -15,7 +15,8 @@ exports.isStar = true;
  * @returns {Object}
  */
 exports.getAppropriateMoment = function (schedule, duration, workingHours) {
-    console.info(schedule, duration, workingHours);
+    //console.info(schedule, duration, workingHours);
+    var timeZone = parseInt(workingHours.from.split('+')[1]);
 
     var freeTimesSchedule = getFreeTime(schedule, workingHours);
     convertToTimeStamps(freeTimesSchedule, workingHours);
@@ -26,10 +27,10 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
     var replacer = function (match, p) {
         var format = {
             '%HH': function (time) {
-                return new Date(time).getHours();
+                return new Date(time).getUTCHours() + timeZone;
             },
             '%MM': function (time) {
-                var minutes = new Date(time).getMinutes();
+                var minutes = new Date(time).getUTCMinutes();
 
                 return ('0' + - (minutes)).substr(-2, 2);
             },
@@ -40,7 +41,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     3: 'СР'
                 };
 
-                var day = new Date(time).getDay();
+                var day = new Date(time).getUTCDay();
 
                 return days[day];
             }
