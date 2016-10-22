@@ -25,15 +25,15 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
     var replacer = function (match, p) {
         var format = {
-            '%HH': function(time) {
+            '%HH': function (time) {
                 return new Date(time).getHours();
             },
-            '%MM': function(time) {
+            '%MM': function (time) {
                 var minutes = new Date(time).getMinutes();
 
-                return ('0'+-~(minutes - 1)).substr(-2,2);
+                return ('0' +- ~(minutes - 1)).substr(-2, 2);
             },
-            '%DD': function(time) {
+            '%DD': function (time) {
                 var days = {
                     1: 'ПН',
                     2: 'ВТ',
@@ -41,12 +41,13 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                 };
 
                 var day = new Date(time).getDay();
+
                 return days[day];
             }
         };
+
         return format[p](correctAttackTimes[0].from);
     };
-
 
     return {
 
@@ -94,16 +95,12 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
     };
 };
 
-function print(times) {
-    times.forEach(function (time) {
-        console.log(timeToString(time.from) + ' - ' + timeToString(time.to));
-    });
-}
 
 function filterAttackTimes(attackTimes, duration) {
     var durationInMilliseconds = duration * 60 * 1000;
 
-    return attackTimes.filter(function(time) {
+    return attackTimes.filter(function (time) {
+
         return time.from + durationInMilliseconds <= time.to;
     });
 }
@@ -114,7 +111,7 @@ function getAttackTimes(schedule, workingHours) {
     var names = Object.keys(schedule);
 
     var bankSchedule = [];
-    ['ПН ', 'ВТ ', 'СР '].forEach(function(day) {
+    ['ПН ', 'ВТ ', 'СР '].forEach(function (day) {
         bankSchedule.push({
             from: getGangstaTimeStamp(day + workingHours.from),
             to: getGangstaTimeStamp(day + workingHours.to)
@@ -135,28 +132,28 @@ function timeToString(time) {
         2: 'ВТ',
         3: 'СР'
     };
-
     var date = new Date(time);
+
     return days[date.getDay()] + ' ' + date.getHours() + ':' + date.getMinutes();
 }
 
 function getSchedulesIntersection(schedule1, schedule2) {
     var intersections = [];
-    for (var i = 0; i < schedule1.length; i++) {
-        for (var j = 0; j < schedule2.length; j++) {
-            var intersection = getTimeIntersection(schedule1[i], schedule2[j]);
+    schedule1.forEach(function (sc1) {
+        schedule2.forEach(function (sc2) {
+            var intersection = getTimeIntersection(schedule1[sc1], schedule2[sc2]);
             if (intersection.exist) {
                 intersections.push(intersection);
             }
-        }
-    }
+        });
+    });
 
     return intersections;
 }
 
 function getFreeTime(schedule, workingHours) {
     var freeSchedule = {};
-    Object.keys(schedule).forEach(function(gang) {
+    Object.keys(schedule).forEach(function (gang) {
         var gangsta = schedule[gang];
         var freeTimes = [];
 
@@ -183,9 +180,9 @@ function getFreeTime(schedule, workingHours) {
     return freeSchedule;
 }
 
-function convertToTimeStamps(schedule, workingHours) {
-    Object.keys(schedule).forEach(function(gangsta) {
-        schedule[gangsta].forEach(function(time, index) {
+function convertToTimeStamps(schedule) {
+    Object.keys(schedule).forEach(function (gangsta) {
+        schedule[gangsta].forEach(function (time) {
             time.from = getGangstaTimeStamp(time.from);
             time.to = getGangstaTimeStamp(time.to);
         });
