@@ -31,7 +31,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             '%MM': function (time) {
                 var minutes = new Date(time).getMinutes();
 
-                return ('0' +- ~(minutes - 1)).substr(-2, 2);
+                return ('0' + - (minutes)).substr(-2, 2);
             },
             '%DD': function (time) {
                 var days = {
@@ -126,22 +126,11 @@ function getAttackTimes(schedule, workingHours) {
     return attackTimes;
 }
 
-function timeToString(time) {
-    var days = {
-        1: 'ПН',
-        2: 'ВТ',
-        3: 'СР'
-    };
-    var date = new Date(time);
-
-    return days[date.getDay()] + ' ' + date.getHours() + ':' + date.getMinutes();
-}
-
 function getSchedulesIntersection(schedule1, schedule2) {
     var intersections = [];
     schedule1.forEach(function (sc1) {
         schedule2.forEach(function (sc2) {
-            var intersection = getTimeIntersection(schedule1[sc1], schedule2[sc2]);
+            var intersection = getTimeIntersection(sc1, sc2);
             if (intersection.exist) {
                 intersections.push(intersection);
             }
