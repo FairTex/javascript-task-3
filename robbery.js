@@ -15,14 +15,11 @@ exports.isStar = true;
  * @returns {Object}
  */
 exports.getAppropriateMoment = function (schedule, duration, workingHours) {
-    //console.info(schedule, duration, workingHours);
+    console.info(schedule, duration, workingHours);
 
     var freeTimesSchedule = getFreeTime(schedule, workingHours);
     convertToTimeStamps(freeTimesSchedule, workingHours);
     var attackTimes = getAttackTimes(freeTimesSchedule, workingHours);
-    //attackTimes.forEach(function (time) {
-    //    console.log(timeToString(time.from) + ' - ' + timeToString(time.to));
-    //});
 
     var correctAttackTimes = filterAttackTimes(attackTimes, duration);
 
@@ -220,4 +217,3 @@ function getGangstaTimeStamp(date) { // 'ПН 09:00+3'
 
     return new Date(convertWeekDay[weekDay] + ' ' + time).getTime();
 }
-
