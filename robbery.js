@@ -1,33 +1,23 @@
 'use strict';
 
-/**
- * Сделано задание на звездочку
- * Реализовано оба метода и tryLater
- */
 exports.isStar = true;
 
-/**
- * @param {Object} schedule – Расписание Банды
- * @param {Number} duration - Время на ограбление в минутах
- * @param {Object} workingHours – Время работы банка
- * @param {String} workingHours.from – Время открытия, например, "10:00+5"
- * @param {String} workingHours.to – Время закрытия, например, "18:00+5"
- * @returns {Object}
- */
+var TIME_ZONE;
+var INDEX = 0;
+
 exports.getAppropriateMoment = function (schedule, duration, workingHours) {
     // console.info(schedule, duration, workingHours);
-    var timeZone = parseInt(workingHours.from.split('+')[1]);
+    TIME_ZONE = parseInt(workingHours.from.split('+')[1]);
 
-    var freeTimesSchedule = getFreeTime(schedule, workingHours);
-    convertToTimeStamps(freeTimesSchedule, workingHours);
-    var attackTimes = getAttackTimes(freeTimesSchedule, workingHours);
-
-    var correctAttackTimes = filterAttackTimes(attackTimes, duration);
+    schedule = invertSchedule(schedule);
+    setTimeStamps(schedule);
+    var bestAttackTime = filterSchedule(schedule, workingHours, duration);
+    var startTimesToAttack = getStartTimes(bestAttackTime, duration);
 
     var replacer = function (match, p) {
         var format = {
             '%HH': function (time) {
-                return new Date(time).getUTCHours() + timeZone;
+                return new Date(time).getUTCHours() + TIME_ZONE;
             },
             '%MM': function (time) {
                 var minutes = new Date(time).getUTCMinutes();
@@ -47,26 +37,14 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             }
         };
 
-        return format[p](correctAttackTimes[0].from);
+        return format[p](startTimesToAttack[INDEX]);
     };
 
     return {
-
-        /**
-         * Найдено ли время
-         * @returns {Boolean}
-         */
         exists: function () {
-            return correctAttackTimes.length > 0;
+            return startTimesToAttack.length > 0;
         },
 
-        /**
-         * Возвращает отформатированную строку с часами для ограбления
-         * Например,
-         *   "Начинаем в %HH:%MM (%DD)" -> "Начинаем в 14:59 (СР)"
-         * @param {String} template
-         * @returns {String}
-         */
         format: function (template) {
             if (!this.exists()) {
 
@@ -76,55 +54,79 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             return template.replace(/(%\S\S)/g, replacer);
         },
 
-        /**
-         * Попробовать найти часы для ограбления позже [*]
-         * @star
-         * @returns {Boolean}
-         */
         tryLater: function () {
-            correctAttackTimes[0].from += 30 * 60 * 1000;
-            var _correctAttackTimes = filterAttackTimes(correctAttackTimes, duration);
-            if (_correctAttackTimes.length > 0) {
-                correctAttackTimes = _correctAttackTimes;
+            if (INDEX < startTimesToAttack.length - 1) {
+                INDEX++;
 
                 return true;
             }
-            correctAttackTimes[0].from -= 30 * 60 * 1000;
 
             return false;
         }
     };
 };
 
-
-function filterAttackTimes(attackTimes, duration) {
+function getStartTimes(bestAttackTime, duration) {
+    var times = [];
+    var halfHour = 30 * 60 * 1000;
+    var count = 0;
     var durationInMilliseconds = duration * 60 * 1000;
+    for (var i = 0; i < bestAttackTime.length; i++) {
+        if (bestAttackTime[i].from + count * halfHour + durationInMilliseconds <= bestAttackTime[i].to) {
+            times.push(bestAttackTime[i].from + count * halfHour);
+            i--;
+            count++;
+        } else {
+            count = 0;
+        }
+    }
 
-    return attackTimes.filter(function (time) {
-
-        return time.from + durationInMilliseconds <= time.to;
-    });
+    return times;
 }
 
-function getAttackTimes(schedule, workingHours) {
-    var attackTimes = [];
-
+function filterSchedule(schedule, workingHours, duration) {
     var names = Object.keys(schedule);
 
     var bankSchedule = [];
     ['ПН ', 'ВТ ', 'СР '].forEach(function (day) {
         bankSchedule.push({
-            from: getGangstaTimeStamp(day + workingHours.from),
-            to: getGangstaTimeStamp(day + workingHours.to)
+            from: getTimeStamp(day + workingHours.from),
+            to: getTimeStamp(day + workingHours.to)
         });
     });
 
-    attackTimes = getSchedulesIntersection(bankSchedule, schedule[names[0]]);
+    var timeIntersection = getSchedulesIntersection(bankSchedule, schedule[names[0]]);
     for (var i = 1; i < names.length; i++) {
-        attackTimes = getSchedulesIntersection(schedule[names[i]], attackTimes);
+        timeIntersection = getSchedulesIntersection(schedule[names[i]], timeIntersection);
     }
 
-    return attackTimes;
+    var durationInMilliseconds = duration * 60 * 1000;
+
+    return timeIntersection.filter(function (time) {
+
+        return time.from + durationInMilliseconds <= time.to;
+    });
+}
+
+function print(schedule) {
+    for (var i = 0; i < schedule.length; i++) {
+        console.log(toStr(schedule[i].from) + ' - ' + toStr(schedule[i].to));
+    }
+}
+
+function toStr(time) {
+    var days = {
+        0: 'ВС',
+        1: 'ПН',
+        2: 'ВТ',
+        3: 'СР'
+    };
+    var day = new Date(time).getUTCDay();
+    day = days[day];
+    var minutes = new Date(time).getUTCMinutes();
+    minutes = ('0' + - (minutes)).substr(-2, 2);
+    var hours = new Date(time).getUTCHours() + TIME_ZONE;
+    return day + ' ' + hours + ':' + minutes;
 }
 
 function getSchedulesIntersection(schedule1, schedule2) {
@@ -141,45 +143,44 @@ function getSchedulesIntersection(schedule1, schedule2) {
     return intersections;
 }
 
-function getFreeTime(schedule, workingHours) {
-    var freeSchedule = {};
-    Object.keys(schedule).forEach(function (gang) {
-        var gangsta = schedule[gang];
-        var freeTimes = [];
+function invertSchedule(schedule) {
+    var _new = {};
+    Object.keys(schedule).forEach(function (name) {
+        var busyTime = schedule[name];
+        var freeTime = [];
 
-        freeTimes.push({
-            from: 'ПН ' + workingHours.from,
-            to: gangsta[0].from
+        freeTime.push({
+            from: 'ПН 00:00+' + TIME_ZONE.toString(),
+            to: busyTime[0].from
         });
 
-        for (var i = 1; i < gangsta.length; i++) {
-            freeTimes.push({
-                from: gangsta[i - 1].to,
-                to: gangsta[i].from
+        for (var i = 1; i < busyTime.length; i++) {
+            freeTime.push({
+                from: busyTime[i - 1].to,
+                to: busyTime[i].from
             });
         }
 
-        freeTimes.push({
-            from: gangsta[gangsta.length - 1].to,
-            to: 'СР ' + workingHours.to
+        freeTime.push({
+            from: busyTime[busyTime.length - 1].to,
+            to: 'СР 23:59+' + TIME_ZONE.toString()
         });
 
-        freeSchedule[gang] = freeTimes;
+        _new[name] = freeTime;
     });
-
-    return freeSchedule;
+    return _new;
 }
 
-function convertToTimeStamps(schedule) {
-    Object.keys(schedule).forEach(function (gangsta) {
-        schedule[gangsta].forEach(function (time) {
-            time.from = getGangstaTimeStamp(time.from);
-            time.to = getGangstaTimeStamp(time.to);
+function setTimeStamps(schedule) {
+    Object.keys(schedule).forEach(function (name) {
+        schedule[name].forEach(function (time) {
+            time.from = getTimeStamp(time.from);
+            time.to = getTimeStamp(time.to);
         });
     });
 }
 
-function getTimeIntersection(firstRange, secondRange) { // ..Range : TimeStamp
+function getTimeIntersection(firstRange, secondRange) {
     var intersection = {
         exist: false,
         from: Math.max(firstRange.from, secondRange.from),
@@ -193,14 +194,14 @@ function getTimeIntersection(firstRange, secondRange) { // ..Range : TimeStamp
     return intersection;
 }
 
-function getGangstaTimeStamp(date) { // 'ПН 09:00+3'
-    var convertWeekDay = {
+function getTimeStamp(date) {
+    var toFullDate = {
         ПН: '01-04-2016',
         ВТ: '01-05-2016',
         СР: '01-06-2016'
     };
-    var weekDay = date.split(' ')[0];
+    var day = date.split(' ')[0];
     var time = date.split(' ')[1];
 
-    return new Date(convertWeekDay[weekDay] + ' ' + time).getTime();
+    return new Date(toFullDate[day] + ' ' + time).getTime();
 }
