@@ -18,7 +18,9 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         var timeDiff = TIME_ZONE * 60 * 60 * 1000;
         var format = {
             '%HH': function (time) {
-                return new Date(time + timeDiff).getUTCHours();
+                var hours = new Date(time + timeDiff).getUTCHours();
+
+                return ('0' + - (hours)).substr(-2, 2);
             },
             '%MM': function (time) {
                 var minutes = new Date(time + timeDiff).getUTCMinutes();
@@ -146,12 +148,34 @@ function invertSchedule(schedule) {
             from: busyTime[busyTime.length - 1].to,
             to: 'СР 23:59+' + TIME_ZONE.toString()
         });
-
         _new[name] = freeTime;
     });
 
     return _new;
 }
+
+function print(schedule) {
+    for (var i = 0; i < schedule.length; i++) {
+        console.log(toStr(schedule[i].from) + ' - ' + toStr(schedule[i].to));
+    }
+}
+
+function toStr(time) {
+    var days = {
+        0: 'ВС',
+        1: 'ПН',
+        2: 'ВТ',
+        3: 'СР'
+    };
+    var day = new Date(time).getUTCDay();
+    day = days[day];
+    var minutes = new Date(time).getUTCMinutes();
+    minutes = ('0' + - (minutes)).substr(-2, 2);
+    var hours = new Date(time).getUTCHours() + TIME_ZONE;
+    return day + ' ' + hours + ':' + minutes;
+}
+
+
 
 function setTimeStamps(schedule) {
     Object.keys(schedule).forEach(function (name) {
