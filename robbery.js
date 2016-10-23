@@ -22,6 +22,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             },
             '%MM': function (time) {
                 var minutes = new Date(time + timeDiff).getUTCMinutes();
+
                 return ('0' + - (minutes)).substr(-2, 2);
             },
             '%DD': function (time) {
@@ -33,6 +34,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     4: 'ЧТ'
                 };
                 var day = new Date(time + timeDiff).getUTCDay();
+
                 return days[day];
             }
         };
@@ -49,14 +51,17 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             if (!this.exists()) {
                 return '';
             }
+
             return template.replace(/(%\S\S)/g, replacer);
         },
 
         tryLater: function () {
             if (index < startTimesToAttack.length - 1) {
                 index++;
+
                 return true;
             }
+            
             return false;
         }
     };
