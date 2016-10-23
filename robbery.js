@@ -3,9 +3,9 @@
 exports.isStar = true;
 
 var TIME_ZONE;
-var INDEX = 0;
 
 exports.getAppropriateMoment = function (schedule, duration, workingHours) {
+    var index = 0;
     // console.info(schedule, duration, workingHours);
     TIME_ZONE = parseInt(workingHours.from.split('+')[1]);
 
@@ -22,7 +22,6 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             },
             '%MM': function (time) {
                 var minutes = new Date(time + timeDiff).getUTCMinutes();
-
                 return ('0' + - (minutes)).substr(-2, 2);
             },
             '%DD': function (time) {
@@ -33,14 +32,12 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     3: 'СР',
                     4: 'ЧТ'
                 };
-
                 var day = new Date(time + timeDiff).getUTCDay();
-
                 return days[day];
             }
         };
 
-        return format[p](startTimesToAttack[INDEX]);
+        return format[p](startTimesToAttack[index]);
     };
 
     return {
@@ -50,20 +47,16 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
         format: function (template) {
             if (!this.exists()) {
-
                 return '';
             }
-
             return template.replace(/(%\S\S)/g, replacer);
         },
 
         tryLater: function () {
-            if (INDEX < startTimesToAttack.length - 1) {
-                INDEX++;
-
+            if (index < startTimesToAttack.length - 1) {
+                index++;
                 return true;
             }
-
             return false;
         }
     };
@@ -108,7 +101,6 @@ function filterSchedule(schedule, workingHours, duration) {
     var durationInMilliseconds = duration * 60 * 1000;
 
     return tIntrsc.filter(function (time) {
-
         return time.from + durationInMilliseconds <= time.to;
     });
 }
