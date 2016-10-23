@@ -20,12 +20,12 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
             '%HH': function (time) {
                 var hours = new Date(time + timeDiff).getUTCHours();
 
-                return ('0' + - (hours)).substr(-2, 2);
+                return addZero(hours);
             },
             '%MM': function (time) {
                 var minutes = new Date(time + timeDiff).getUTCMinutes();
 
-                return ('0' + - (minutes)).substr(-2, 2);
+                return addZero(minutes);
             },
             '%DD': function (time) {
                 var days = {
@@ -68,6 +68,15 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         }
     };
 };
+
+function addZero(digit) {
+    if (digit.toString().length === 1) {
+
+        return '0' + digit.toString();
+    }
+
+    return digit;
+}
 
 function getStartTimes(bestAttackTime, duration) {
     var times = [];
@@ -153,29 +162,6 @@ function invertSchedule(schedule) {
 
     return _new;
 }
-
-function print(schedule) {
-    for (var i = 0; i < schedule.length; i++) {
-        console.log(toStr(schedule[i].from) + ' - ' + toStr(schedule[i].to));
-    }
-}
-
-function toStr(time) {
-    var days = {
-        0: 'ВС',
-        1: 'ПН',
-        2: 'ВТ',
-        3: 'СР'
-    };
-    var day = new Date(time).getUTCDay();
-    day = days[day];
-    var minutes = new Date(time).getUTCMinutes();
-    minutes = ('0' + - (minutes)).substr(-2, 2);
-    var hours = new Date(time).getUTCHours() + TIME_ZONE;
-    return day + ' ' + hours + ':' + minutes;
-}
-
-
 
 function setTimeStamps(schedule) {
     Object.keys(schedule).forEach(function (name) {
