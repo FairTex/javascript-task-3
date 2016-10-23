@@ -95,9 +95,9 @@ function filterSchedule(schedule, workingHours, duration) {
         });
     });
 
-    var timeIntersection = getSchedulesIntersection(bankSchedule, schedule[names[0]]);
+    var tIntrsc = getSchedulesIntersection(bankSchedule, schedule[names[0]]);
     for (var i = 1; i < names.length; i++) {
-        timeIntersection = getSchedulesIntersection(schedule[names[i]], timeIntersection);
+        tIntrsc = getSchedulesIntersection(schedule[names[i]], tIntrsc);
     }
 
     var durationInMilliseconds = duration * 60 * 1000;
@@ -106,27 +106,6 @@ function filterSchedule(schedule, workingHours, duration) {
 
         return time.from + durationInMilliseconds <= time.to;
     });
-}
-
-function print(schedule) {
-    for (var i = 0; i < schedule.length; i++) {
-        console.log(toStr(schedule[i].from) + ' - ' + toStr(schedule[i].to));
-    }
-}
-
-function toStr(time) {
-    var days = {
-        0: 'ВС',
-        1: 'ПН',
-        2: 'ВТ',
-        3: 'СР'
-    };
-    var day = new Date(time).getUTCDay();
-    day = days[day];
-    var minutes = new Date(time).getUTCMinutes();
-    minutes = ('0' + - (minutes)).substr(-2, 2);
-    var hours = new Date(time).getUTCHours() + TIME_ZONE;
-    return day + ' ' + hours + ':' + minutes;
 }
 
 function getSchedulesIntersection(schedule1, schedule2) {
@@ -168,6 +147,7 @@ function invertSchedule(schedule) {
 
         _new[name] = freeTime;
     });
+
     return _new;
 }
 
