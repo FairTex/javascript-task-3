@@ -72,7 +72,9 @@ function getStartTimes(bestAttackTime, duration) {
     var count = 0;
     var durationInMilliseconds = duration * 60 * 1000;
     for (var i = 0; i < bestAttackTime.length; i++) {
-        if (bestAttackTime[i].from + count * halfHour + durationInMilliseconds <= bestAttackTime[i].to) {
+        if (bestAttackTime[i].from +
+            count * halfHour +
+            durationInMilliseconds <= bestAttackTime[i].to) {
             times.push(bestAttackTime[i].from + count * halfHour);
             i--;
             count++;
@@ -102,7 +104,7 @@ function filterSchedule(schedule, workingHours, duration) {
 
     var durationInMilliseconds = duration * 60 * 1000;
 
-    return timeIntersection.filter(function (time) {
+    return tIntrsc.filter(function (time) {
 
         return time.from + durationInMilliseconds <= time.to;
     });
