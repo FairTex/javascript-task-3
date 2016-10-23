@@ -15,23 +15,26 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
     var startTimesToAttack = getStartTimes(bestAttackTime, duration);
 
     var replacer = function (match, p) {
+        var timeDiff = TIME_ZONE * 60 * 60 * 1000;
         var format = {
             '%HH': function (time) {
-                return new Date(time).getUTCHours() + TIME_ZONE;
+                return new Date(time + timeDiff).getUTCHours();
             },
             '%MM': function (time) {
-                var minutes = new Date(time).getUTCMinutes();
+                var minutes = new Date(time + timeDiff).getUTCMinutes();
 
                 return ('0' + - (minutes)).substr(-2, 2);
             },
             '%DD': function (time) {
                 var days = {
+                    0: 'ВС',
                     1: 'ПН',
                     2: 'ВТ',
-                    3: 'СР'
+                    3: 'СР',
+                    4: 'ЧТ'
                 };
 
-                var day = new Date(time).getUTCDay();
+                var day = new Date(time + timeDiff).getUTCDay();
 
                 return days[day];
             }
@@ -185,5 +188,5 @@ function getTimeStamp(date) {
     var day = date.split(' ')[0];
     var time = date.split(' ')[1];
 
-    return new Date(toFullDate[day] + ' ' + time).getTime();
+    return Date.parse(toFullDate[day] + ' ' + time);
 }
