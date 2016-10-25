@@ -9,8 +9,8 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
     // console.info(schedule, duration, workingHours);
 
     TIME_ZONE = parseInt(workingHours.from.split('+')[1]) % 24;
-    workingHours.from = workingHours.from.slice(0, 8);
-    workingHours.to = workingHours.to.slice(0, 8);
+    workingHours.from = workingHours.from.slice(0, 4);
+    workingHours.to = workingHours.to.slice(0, 4);
 
     schedule = invertSchedule(schedule);
     setTimeStamps(schedule);
