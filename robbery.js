@@ -155,7 +155,7 @@ function invertSchedule(schedule) {
 
         freeTime.push({
             from: busyTime[busyTime.length - 1].to,
-            to: 'СР 23:59+' + TIME_ZONE.toString()
+            to: 'ВС 23:59+' + TIME_ZONE.toString()
         });
         _new[name] = freeTime;
     });
@@ -190,7 +190,11 @@ function getTimeStamp(date) {
     var toFullDate = {
         ПН: '01-04-2016',
         ВТ: '01-05-2016',
-        СР: '01-06-2016'
+        СР: '01-06-2016',
+        ЧТ: '01-07-2016',
+        ПТ: '01-08-2016',
+        СБ: '01-09-2016',
+        ВС: '01-10-2016'
     };
     var day = date.split(' ')[0];
     var time = date.split(' ')[1];
