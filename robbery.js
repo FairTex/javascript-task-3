@@ -9,8 +9,8 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
     // console.info(schedule, duration, workingHours);
 
     TIME_ZONE = parseInt(workingHours.from.split('+')[1]) % 24;
-    workingHours.from = workingHours.from.slice(0, 4);
-    workingHours.to = workingHours.to.slice(0, 4);
+    workingHours.from = workingHours.from.replace(/\+\d+/, '+' + TIME_ZONE);
+    workingHours.to = workingHours.to.replace(/\+\d+/, '+' + TIME_ZONE);
 
     schedule = invertSchedule(schedule);
     setTimeStamps(schedule);
@@ -107,8 +107,8 @@ function filterSchedule(schedule, workingHours, duration) {
     var bankSchedule = [];
     ['ПН ', 'ВТ ', 'СР '].forEach(function (day) {
         bankSchedule.push({
-            from: getTimeStamp(day + workingHours.from + TIME_ZONE.toString()),
-            to: getTimeStamp(day + workingHours.to + TIME_ZONE.toString())
+            from: getTimeStamp(day + workingHours.from),
+            to: getTimeStamp(day + workingHours.to)
         });
     });
 
