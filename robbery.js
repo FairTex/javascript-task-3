@@ -88,7 +88,6 @@ function getStartTimes(bestAttackTime, duration) {
 
     var currentTime = bestAttackTime[0].from;
     times.push(currentTime);
-    var count = 0;
     var isPossible = true;
 
     while (isPossible) {
@@ -107,9 +106,9 @@ function getStartTimes(bestAttackTime, duration) {
 function checkPossibleTime(bestAttackTime, possibleTime, durationInMilliseconds) {
     for (var i = 0; i < bestAttackTime.length; i ++) {
         if (containsRange(bestAttackTime[i], {
-                from: possibleTime,
-                to: possibleTime + durationInMilliseconds
-            })) {
+            from: possibleTime,
+            to: possibleTime + durationInMilliseconds
+        })) {
 
             return true;
         }
