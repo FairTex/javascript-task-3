@@ -111,9 +111,11 @@ function process(intervals, result, durationInMillisecond) {
             result.push(possibleTime);
             possibleTime += halfHour;
         }
-        index = Math.ceil(getIndex(intervals, possibleTime));
-        if ((index ^ 0) === index) {
+        index = getIndex(intervals, possibleTime);
+        if (Math.ceil(index) === index) {
             index += 1;
+        } else {
+            index = Math.ceil(index);
         }
     }
 }
@@ -150,7 +152,7 @@ function check(possibleTime, durationInMillisecond, intervals) {
 
             return true;
         }
-    } catch(e) {
+    } catch (e) {
 
         return false;
     }
