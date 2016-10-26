@@ -14,6 +14,10 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
     schedule = invertSchedule(schedule);
     setTimeStamps(schedule);
+    console.log(schedule);
+    fixErrors(schedule);
+    console.log(schedule);
+
     var bestAttackTime = filterSchedule(schedule, workingHours, duration);
     var startTimesToAttack = getStartTimes(bestAttackTime, duration);
 
@@ -77,6 +81,22 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         }
     };
 };
+
+function fixErrors(schedule) {
+    Object.keys(schedule).forEach(function (name) {
+        var busyTime = schedule[name];
+        var delIndexes = [];
+        for (var i = 0; i < busyTime.length; i++) {
+            if (busyTime[i].from > busyTime[i].to) {
+                delIndexes.push(i);
+            }
+        }
+
+        delIndexes.forEach(function (index) {
+            busyTime.splice(index, 1);
+        });
+    });
+}
 
 function addZero(digit) {
     if (digit < 10) {
