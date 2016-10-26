@@ -8,35 +8,38 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
     var index = 0;
     // console.info(schedule, duration, workingHours);
 
-    TIME_ZONE = parseInt(workingHours.from.split('+')[1]) % 24;
-    workingHours.from = workingHours.from.replace(/\+\d+/, '+' + TIME_ZONE);
-    workingHours.to = workingHours.to.replace(/\+\d+/, '+' + TIME_ZONE);
+    TIME_ZONE = parseInt(workingHours.from.split('+')[1]);
+    // workingHours.from = workingHours.from.replace(/\+\d+/, '+' + TIME_ZONE);
+    // workingHours.to = workingHours.to.replace(/\+\d+/, '+' + TIME_ZONE);
+
+
 
     schedule = invertSchedule(schedule);
+
     setTimeStamps(schedule);
     // console.log(schedule);
     fixErrors(schedule);
     // console.log(schedule);
-
+    print(schedule);
     var bestAttackTime = filterSchedule(schedule, workingHours, duration);
     var startTimesToAttack = getStartTimes(bestAttackTime, duration);
 
     // console.log(bestAttackTime);
 
-    // console.log(startTimesToAttack.map(function (time) {
-    //     return toStr(time);
-    // }));
+    console.log(startTimesToAttack.map(function (time) {
+        return toStr(time);
+    }));
 
     var replacer = function (match, p) {
         var timeDiff = TIME_ZONE * 60 * 60 * 1000;
         var format = {
             '%HH': function (time) {
-                var hours = new Date(time + timeDiff).getUTCHours();
+                var hours = new Date(time).getHours();
 
                 return addZero(hours);
             },
             '%MM': function (time) {
-                var minutes = new Date(time + timeDiff).getUTCMinutes();
+                var minutes = new Date(time).getMinutes();
 
                 return addZero(minutes);
             },
@@ -48,7 +51,7 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
                     3: 'СР',
                     4: 'ЧТ'
                 };
-                var day = new Date(time + timeDiff).getUTCDay();
+                var day = new Date(time).getDay();
 
                 return days[day];
             }
@@ -81,6 +84,32 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
         }
     };
 };
+
+function print(schedule) {
+    var names = Object.keys(schedule);
+    names.forEach(function (name) {
+        console.log(name + ':');
+        for (var i = 0; i < schedule[name].length; i++) {
+            console.log(toStr(schedule[name][i].from) + ' - ' + toStr(schedule[name][i].to));
+        }
+    });
+}
+
+function toStr(time) {
+    var timeDiff = TIME_ZONE * 60 * 60 * 1000;
+    var days = {
+        0: 'ВС',
+        1: 'ПН',
+        2: 'ВТ',
+        3: 'СР',
+        4: 'ЧТ'
+    };
+    var day = new Date(time).getUTCDay();
+    day = days[day];
+    var minutes = new Date(time).getUTCMinutes();
+    var hours = new Date(time ).getUTCHours();
+    return day + ' ' + addZero(hours) + ':' + addZero(minutes);
+}
 
 function fixErrors(schedule) {
     Object.keys(schedule).forEach(function (name) {
@@ -281,5 +310,8 @@ function getTimeStamp(date) {
     var day = date.split(' ')[0];
     var time = date.split(' ')[1];
 
-    return Date.parse(toFullDate[day] + ' ' + time);
+    var _date = new Date(toFullDate[day] + ' ' + time);
+    _date.setHours(_date.getHours() + TIME_ZONE);
+
+    return _date.getTime();
 }
