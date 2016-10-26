@@ -1,6 +1,6 @@
 'use strict';
 
-exports.isStar = true;
+exports.isStar = false;
 
 var TIME_ZONE;
 
@@ -16,6 +16,12 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
     setTimeStamps(schedule);
     var bestAttackTime = filterSchedule(schedule, workingHours, duration);
     var startTimesToAttack = getStartTimes(bestAttackTime, duration);
+
+    // console.log(bestAttackTime);
+
+    // console.log(startTimesToAttack.map(function (time) {
+    //     return toStr(time);
+    // }));
 
     var replacer = function (match, p) {
         var timeDiff = TIME_ZONE * 60 * 60 * 1000;
@@ -82,45 +88,74 @@ function addZero(digit) {
 }
 
 function getStartTimes(bestAttackTime, duration) {
-    var times = [];
-    var halfHour = 30 * 60 * 1000;
-    var durationInMilliseconds = duration * 60 * 1000;
+    if (bestAttackTime.length === 0) {
 
-    var currentTime = bestAttackTime[0].from;
-    times.push(currentTime);
-    var isPossible = true;
-
-    while (isPossible) {
-        isPossible = false;
-        var possibleTime = currentTime + halfHour;
-        if (checkPossibleTime(bestAttackTime, possibleTime, durationInMilliseconds)) {
-            times.push(possibleTime);
-            currentTime = possibleTime;
-            isPossible = true;
-        }
+        return [];
     }
+
+    var times = [];
+    process(bestAttackTime, times, duration * 60 * 1000);
 
     return times;
 }
 
-function checkPossibleTime(bestAttackTime, possibleTime, durationInMilliseconds) {
-    for (var i = 0; i < bestAttackTime.length; i ++) {
-        if (containsRange(bestAttackTime[i], {
-            from: possibleTime,
-            to: possibleTime + durationInMilliseconds
-        })) {
+function process(intervals, result, durationInMillisecond) {
+    var halfHour = 30 * 60 * 1000;
+    var index = 0;
 
-            return true;
+    while (index < intervals.length) {
+        var currentTime = intervals[index].from;
+        result.push(currentTime);
+        var possibleTime = currentTime + halfHour;
+        while (check(possibleTime, durationInMillisecond, intervals)) {
+            result.push(possibleTime);
+            possibleTime += halfHour;
+        }
+        index = Math.ceil(getIndex(intervals, possibleTime));
+        if ((index ^ 0) === index) {
+            index += 1;
+        }
+    }
+}
+
+function getIndex(intervals, possibleTime) {
+    for (var i = 0.0; i < intervals.length - 1; i ++) {
+        if (intervals[i].from <= possibleTime &&
+            possibleTime <= intervals[i].to) {
+
+            return i;
+        } else if (intervals[i].to <= possibleTime &&
+            possibleTime <= intervals[i + 1].from) {
+
+            return i + 0.5;
         }
     }
 
-    return false;
+    if (intervals[intervals.length - 1].from <= possibleTime &&
+        possibleTime <= intervals[intervals.length - 1].to) {
+
+        return intervals.length - 1;
+    }
+
+    if (intervals[intervals.length - 1].to <= possibleTime) {
+
+        return intervals.length - 0.5;
+    }
 }
 
-function containsRange(interval, timeToCheck) {
+function check(possibleTime, durationInMillisecond, intervals) {
+    var index = getIndex(intervals, possibleTime);
+    try {
+        if (possibleTime + durationInMillisecond <= intervals[index].to) {
 
-    return interval.from <= timeToCheck.from && timeToCheck.from <= interval.to &&
-        interval.from <= timeToCheck.to && timeToCheck.to <= interval.to;
+            return true;
+        }
+    } catch(e) {
+
+        return false;
+    }
+
+    return false;
 }
 
 function filterSchedule(schedule, workingHours, duration) {
