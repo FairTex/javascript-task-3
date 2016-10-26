@@ -14,9 +14,9 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 
     schedule = invertSchedule(schedule);
     setTimeStamps(schedule);
-    console.log(schedule);
+    // console.log(schedule);
     fixErrors(schedule);
-    console.log(schedule);
+    // console.log(schedule);
 
     var bestAttackTime = filterSchedule(schedule, workingHours, duration);
     var startTimesToAttack = getStartTimes(bestAttackTime, duration);
