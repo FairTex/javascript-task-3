@@ -73,9 +73,9 @@ exports.getAppropriateMoment = function (schedule, duration, workingHours) {
 };
 
 function addZero(digit) {
-    if (digit.toString().length === 1) {
+    if (digit < 10) {
 
-        return '0' + digit.toString();
+        return '0' + digit;
     }
 
     return digit;
@@ -84,21 +84,44 @@ function addZero(digit) {
 function getStartTimes(bestAttackTime, duration) {
     var times = [];
     var halfHour = 30 * 60 * 1000;
-    var count = 0;
     var durationInMilliseconds = duration * 60 * 1000;
-    for (var i = 0; i < bestAttackTime.length; i++) {
-        if (bestAttackTime[i].from +
-            count * halfHour +
-            durationInMilliseconds <= bestAttackTime[i].to) {
-            times.push(bestAttackTime[i].from + count * halfHour);
-            i--;
-            count++;
-        } else {
-            count = 0;
+
+    var currentTime = bestAttackTime[0].from;
+    times.push(currentTime);
+    var count = 0;
+    var isPossible = true;
+
+    while (isPossible) {
+        isPossible = false;
+        var possibleTime = currentTime + halfHour;
+        if (checkPossibleTime(bestAttackTime, possibleTime, durationInMilliseconds)) {
+            times.push(possibleTime);
+            currentTime = possibleTime;
+            isPossible = true;
         }
     }
 
     return times;
+}
+
+function checkPossibleTime(bestAttackTime, possibleTime, durationInMilliseconds) {
+    for (var i = 0; i < bestAttackTime.length; i ++) {
+        if (containsRange(bestAttackTime[i], {
+                from: possibleTime,
+                to: possibleTime + durationInMilliseconds
+            })) {
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function containsRange(interval, timeToCheck) {
+
+    return interval.from <= timeToCheck.from && timeToCheck.from <= interval.to &&
+        interval.from <= timeToCheck.to && timeToCheck.to <= interval.to;
 }
 
 function filterSchedule(schedule, workingHours, duration) {
