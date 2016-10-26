@@ -227,7 +227,7 @@ function invertSchedule(schedule) {
         var freeTime = [];
 
         freeTime.push({
-            from: 'ПН 00:00+' + TIME_ZONE.toString(),
+            from: 'ПН 00:00+23', //  + TIME_ZONE.toString()
             to: busyTime[0].from
         });
 
@@ -240,7 +240,7 @@ function invertSchedule(schedule) {
 
         freeTime.push({
             from: busyTime[busyTime.length - 1].to,
-            to: 'ВС 23:59+' + TIME_ZONE.toString()
+            to: 'ВС 23:59+23' // + TIME_ZONE.toString()
         });
         _new[name] = freeTime;
     });
